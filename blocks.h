@@ -4,39 +4,15 @@
 
 #include <cstdint>
 #include <stdexcept>
+
 #include "node.h"
+#include "block_item_utils.h"
 
 
 namespace paged_map {
 
 
-constexpr size_t next_power_of_2_impl(size_t i) { return i == 0 ? 1 : next_power_of_2_impl(i >> 1) << 1; }
-constexpr size_t next_power_of_2(size_t i) { return i == 0 ? 0 : next_power_of_2_impl(i - 1); }
-
-
-template<typename value_t>
-class block_item {
-public:
-    operator const value_t&() const { return reinterpret_cast<const value_t &>(_data); }
-    operator value_t&() { return reinterpret_cast<value_t &>(_data); }
-
-    template<typename ...param_ts>
-    void construct(param_ts &&...params) {
-        new (reinterpret_cast<void *>(&_data)) value_t(std::forward<param_ts>(params)...)
-    }
-
-    void destruct() {
-        reinterpret_cast<value_t *>(&_data)->~value_t();
-        std::fill_n(_data, sizeof(_data) / sizeof(_data[0]), 0xDA);
-    }
-
-private:
-    typedef data[next_power_of_2(sizeof(value_t))] data_buffer_t;
-    alignas(value_t) data_buffer_t _data;
-};
-
-
-template<typename item_t>
+template<typename item_t, template<typename ...param_ts> class item_wrapper_t = block_item>
 class blocks {
 public:
     blocks(size_t init_count = 256)
@@ -106,7 +82,7 @@ private:
 
 private:
     struct block {
-        block_item<item_t> item;
+        item_wrapper_t<item_t> item;
         enum block_state : uint8_t { Used, Free } state;
     };
     size_t _last_allocated;

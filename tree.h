@@ -15,12 +15,17 @@ namespace paged_map {
 // * manages pages (owns, re-uses already allocated ones)
 // * scales page structure (zoom_in, zoom_out)
 // * accesses given address (access: operator[], insertion: insert())
-template<typename address_t, typename value_t, typename page_t, size_t max_page_size>
-class tree {
+template<typename address_t, typename value_t, size_t max_page_size>
+class tree
+{
 public:
     typedef size_t page_link_t; // make it smaller?..
     typedef node<address_t, value_t, page_link_t> node_t;
+
+    typedef page<address_t, value_t> page_t;
     typedef typename page_t::data_t page_data_t;
+
+    tree() = default;
 
     // should allocate new table (or tables, recursively)
     page_t *zoom_in(node_t *target, size_t this_node_size, size_t sample_size) {
@@ -47,8 +52,8 @@ public:
 
 private:
     page_t _root;
-    blocks<page_t> pages;
-    //blocks<page_data_t> pages; // page_data_t storage that is able to reuse
+    blocks<page_data_t, block_vector_item> pages_data;
+    blocks<page_t> pages; // remove this, now pages are stored by value inside nodes and reference data from above
 };
 
 
