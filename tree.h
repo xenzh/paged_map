@@ -26,7 +26,9 @@ public:
     typedef page<address_t, value_t> page_t;
     typedef typename page_t::data_t page_data_t;
 
-    tree() = default;
+    // default c-tor
+    // c-tor that takes [start, end) as a hint and deduces granularity
+    // c-tor that takes [start, end) and sample_size as a hint. if element number > max_page_size, should fall back to prev mode
 
     // should allocate new table (or tables, recursively)
     page_t *zoom_in(node_t *target, size_t this_node_size, size_t sample_size) {
@@ -44,12 +46,18 @@ public:
     }
 
     // should allocate new root table and adopt the old one
-    void zoom_out();
+    // void zoom_out();
 
     const value_t &operator[](address_t address) const { return _root[address]; }
     value_t &operator[](address_t address) { return _root[address]; }
 
     //value_t &emplace(address_t address, value_t value)
+
+private:
+    node_t &add_page(node_t &target, address_t start_addr, size_t granularity, size_t size) {
+        return target = node_t( page_t(start_addr, &pages_data[pages_data.emplace(size)], granularity) );
+    }
+    //void remove_page(const page_t &page);
 
 private:
     page_t _root; // tree should own it, but it'd be nice to page_t to remain RAII

@@ -47,7 +47,7 @@ class block_vector_item
 {
 public:
     typedef value_t vector_t;
-    typedef vector_t::value_type elem_t;
+    typedef typename vector_t::value_type elem_t;
 
     block_vector_item() : _constructed( false ) { }
 

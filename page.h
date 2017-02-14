@@ -14,6 +14,7 @@ class page {
 public:
     typedef std::vector<value_t> data_t;
 
+    page() : _granularity(0), _start_idx(0), _list(nullptr) { } // temp to allow tree to own empty page
     page(address_t start, data_t *list, size_t granularity) : _granularity(granularity), _start_idx(idx(start)), _list(list) { }
 
     const value_t &operator[](address_t address) const { return (*_list)[idx(address)]; }

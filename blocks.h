@@ -37,11 +37,13 @@ public:
     template<typename ...param_ts>
     size_t emplace(param_ts &&...params) {
         const auto old_size = _current_size;
-        auto &block = _storage[next_free_idx()];
+        const auto this_idx = next_free_idx();
+        auto &block = _storage[this_idx];
 
         try {
             block.item.construct(std::forward<param_ts>(params)...);
             block.state = block::block_state::Used;
+            return this_idx;
         }
         catch (...) {
             block.item.destruct();
