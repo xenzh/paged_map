@@ -46,6 +46,9 @@ template<
 class block_vector_item
 {
 public:
+    typedef value_t vector_t;
+    typedef vector_t::value_type elem_t;
+
     block_vector_item() : _constructed( false ) { }
 
     operator const value_t&() const { return reinterpret_cast<const value_t &>(_data); }
@@ -54,22 +57,25 @@ public:
     template<typename ...param_ts>
     void construct(param_ts &&...params)
     {
-        if ( !_constructed ) {
-            new ( reinterpret_cast<void *>( &_data ) ) value_t( std::forward<param_ts>( params )... );
+        if (!_constructed) {
+            new (reinterpret_cast<void *>(&_data)) vector_t(std::forward<param_ts>(params)...);
             _constructed = true;
         }
         else {
-            const auto new_size = get_size( std::forward<param_ts>( params )... );
-            const auto &vect = static_cast<const value_t &>( *this );
+            const auto new_size = get_size(std::forward<param_ts>(params )...);
+            const auto &vect = static_cast<const vector_t &>(*this);
 
-            if ( vect.size() != new_size )
-                vect.resize( new_size );
+            if (vect.size() != new_size)
+                vect.resize(new_size);
         }
     }
 
     void destruct() {
         if (_constructed) {
-            // call d-tors for all vector elements
+            const auto &vect = static_cast<const vector_t &>(*this);
+            for (const auto &elem : vect) {
+                item.~elem_t();
+            }
         }
     }
 

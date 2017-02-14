@@ -15,6 +15,7 @@ namespace paged_map {
 // * manages pages (owns, re-uses already allocated ones)
 // * scales page structure (zoom_in, zoom_out)
 // * accesses given address (access: operator[], insertion: insert())
+// TODO: implement iterator?..
 template<typename address_t, typename value_t, size_t max_page_size>
 class tree
 {
@@ -51,7 +52,7 @@ public:
     //value_t &emplace(address_t address, value_t value)
 
 private:
-    page_t _root;
+    page_t _root; // tree should own it, but it'd be nice to page_t to remain RAII
     blocks<page_data_t, block_vector_item> pages_data;
     blocks<page_t> pages; // remove this, now pages are stored by value inside nodes and reference data from above
 };
